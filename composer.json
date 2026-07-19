@@ -1,5 +1,18 @@
 {
+    "name": "szymon-s292/ksef-client",
+    "description": "A KSeF 2.0 client library for PHP with support for XAdES authentication.",
+    "type": "library",
     "require": {
         "phpseclib/phpseclib": "^3.0"
-    }
+    },
+    "autoload": {
+        "psr-4": {"szymon-s292\\KsefClient\\": "src/"}
+    },
+    "authors": [
+        {
+        "name": "Szymon Stajszczyk",
+        "email": "stajszczykszymon@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
 }
