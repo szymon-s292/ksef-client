@@ -1,7 +1,9 @@
 <?php 
-require_once "http.php";
+namespace KSeFClient;
 
-class BadRequestException extends Exception {
+require_once __DIR__ . "/http.php";
+
+class BadRequestException extends \Exception {
     public $exceptionDetails;
     public $exceptionCode;
 
@@ -13,7 +15,7 @@ class BadRequestException extends Exception {
     }
 }
 
-class TooManyRequestsException extends Exception {
+class TooManyRequestsException extends \Exception {
     public function __construct() {
         parent::__construct("Too many requests");
     }
@@ -30,7 +32,7 @@ class KsefApi {
         $response = Http::post($this->url."/v2/auth/challenge");
 
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/auth/challenge responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/auth/challenge responded with status code: ".$response->statusCode);
         }
 
         $json = json_decode($response->body, true);
@@ -52,7 +54,7 @@ class KsefApi {
         }
         
         if($response->statusCode != 202) {
-            throw new Exception($this->url."/v2/auth/ksef-token responded with status code: ".$response->statusCode . " " . $response->body);
+            throw new \Exception($this->url."/v2/auth/ksef-token responded with status code: ".$response->statusCode . " " . $response->body);
         }
 
         $json = json_decode($response->body, true);
@@ -74,7 +76,7 @@ class KsefApi {
         }
 
         if($response->statusCode != 202) {
-            throw new Exception($this->url."/v2/auth/xades-signature responded with status code: " . $response->statusCode . " " . $response->body);
+            throw new \Exception($this->url."/v2/auth/xades-signature responded with status code: " . $response->statusCode . " " . $response->body);
         }
 
         $json = json_decode($response->body, true);
@@ -87,7 +89,7 @@ class KsefApi {
             "Accept: application/json"]);
         
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/auth/$reference_number responded with status code: ".$response->statusCode . " " . $response->body);
+            throw new \Exception($this->url."/v2/auth/$reference_number responded with status code: ".$response->statusCode . " " . $response->body);
         }
         
         $json = json_decode($response->body, true);
@@ -102,7 +104,7 @@ class KsefApi {
         ]);
         
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/auth/token/redeem responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/auth/token/redeem responded with status code: ".$response->statusCode);
         }
         
         $json = json_decode($response->body, true);
@@ -125,7 +127,7 @@ class KsefApi {
         }
 
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/auth/token/refresh responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/auth/token/refresh responded with status code: ".$response->statusCode);
         }
         
         $json = json_decode($response->body, true);
@@ -138,7 +140,7 @@ class KsefApi {
         ]);
         
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/security/public-key-certificates with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/security/public-key-certificates with status code: ".$response->statusCode);
         }
         
         $json = json_decode($response->body, true);
@@ -153,7 +155,7 @@ class KsefApi {
         ]);
 
         if($response->statusCode != 201) {
-            throw new Exception($this->url."/v2/sessions/online responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/sessions/online responded with status code: ".$response->statusCode);
         }
         
         $json = json_decode($response->body, true);
@@ -169,7 +171,7 @@ class KsefApi {
         $json = json_decode($response->body, true);
 
         if($response->statusCode != 202) {
-            throw new Exception($this->url."/v2/sessions/online/$reference_number/invoices responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/sessions/online/$reference_number/invoices responded with status code: ".$response->statusCode);
         }
         
         return $json;
@@ -191,7 +193,7 @@ class KsefApi {
         }
 
         if($response->statusCode != 204) {
-            throw new Exception($this->url."/v2/sessions/online/$reference_number/close responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/sessions/online/$reference_number/close responded with status code: ".$response->statusCode);
         }
         
         return true;
@@ -204,7 +206,7 @@ class KsefApi {
         ]);
     
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/sessions/$reference_number/invoices responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/sessions/$reference_number/invoices responded with status code: ".$response->statusCode);
         }
         
         $json = json_decode($response->body, true);
@@ -226,7 +228,7 @@ class KsefApi {
         }
     
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/sessions/$session_reference_number/invoices responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/sessions/$session_reference_number/invoices responded with status code: ".$response->statusCode);
         }
         
         $json = json_decode($response->body, true);
@@ -239,7 +241,7 @@ class KsefApi {
         ]);
     
         if($response->statusCode != 200) {
-            throw new Exception($url." responded with status code: ".$response->statusCode);
+            throw new \Exception($url." responded with status code: ".$response->statusCode);
         }
         
         return $response->body;
@@ -265,7 +267,7 @@ class KsefApi {
         }
 
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/invoices/query/metadata responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/invoices/query/metadata responded with status code: ".$response->statusCode);
         }
 
         $json = json_decode($response->body, true);
@@ -279,7 +281,7 @@ class KsefApi {
         ]);
     
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/invoices/ksef/$ksef_nr responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/invoices/ksef/$ksef_nr responded with status code: ".$response->statusCode);
         }
         
         return $response->body;
@@ -292,7 +294,7 @@ class KsefApi {
         ]);
     
         if($response->statusCode != 200) {
-            throw new Exception($this->url."/v2/sessions/$session_reference_number/invoices/$invoice_reference_number/upo responded with status code: ".$response->statusCode);
+            throw new \Exception($this->url."/v2/sessions/$session_reference_number/invoices/$invoice_reference_number/upo responded with status code: ".$response->statusCode);
         }
         
         return $response->body;

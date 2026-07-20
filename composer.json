@@ -6,7 +6,13 @@
         "phpseclib/phpseclib": "^3.0"
     },
     "autoload": {
-        "psr-4": {"szymon-s292\\KsefClient\\": "src/"}
+        "psr-4": {
+            "KSeFClient\\": "src/"
+        }
+        ,
+        "classmap": [
+            "src/"
+        ]
     },
     "authors": [
         {

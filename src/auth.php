@@ -1,12 +1,5 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once "db.php";
-require_once "xades_signer.php";
-require_once "auth_request_builder.php";
-require_once "token_manager.php";
-require_once "key_manager.php";
-require_once "ksef_api.php";
-require_once "misc.php";
+namespace KSeFClient;
 
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Crypt\RSA;
@@ -42,7 +35,7 @@ class Auth {
 
     public function auth_with_xades() {
         if (!$this->ksef_cert || !$this->ksef_pkey)
-            throw new Exception("Brak certyfikatu lub klucza prywatnego KSeF");
+                throw new \Exception("Brak certyfikatu lub klucza prywatnego KSeF");
 
         $challenge_response = $this->ksef_api->get_challenge();
         $challenge = $challenge_response["challenge"];
@@ -59,7 +52,7 @@ class Auth {
             $xades_signer = new XadesSigner();
             $signedXml = $xades_signer->sign($unsigned_xml, $this->ksef_pkey, $this->ksef_cert, $this->pkey_passphrase);
             $xades = $signedXml->saveXML();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw $e;
         }
 
@@ -71,7 +64,7 @@ class Auth {
             $this->auth_status_code = $e->exceptionCode;
             $this->auth_status_desc = $e->exceptionDetails;
             throw $e;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw $e;
         }
 
@@ -79,7 +72,7 @@ class Auth {
             sleep(1);
             $json = $this->ksef_api->get_authentication_status($reference_number, $authentication_token);
             if (!$json || !isset($json["status"]["code"])) {
-                throw new Exception("Błąd podczas pobierania statusu uwierzytelnienia: " . json_encode($json));
+                    throw new \Exception("Błąd podczas pobierania statusu uwierzytelnienia: " . json_encode($json));
             }
 
         } while ($json["status"]["code"] == 100);
@@ -88,7 +81,7 @@ class Auth {
         $this->auth_status_code = $json["status"]["code"] ?? "";
 
         if ($json["status"]["code"] != 200)
-            throw new Exception("Błąd uwierzytelniania: " . $json["status"]["code"] . " " . ($json["status"]["description"] ?? ''));
+                throw new \Exception("Błąd uwierzytelniania: " . $json["status"]["code"] . " " . ($json["status"]["description"] ?? ''));
 
         $json = $this->ksef_api->get_access_tokens($authentication_token);
 
@@ -111,11 +104,11 @@ class Auth {
     public function auth_with_token() {
         $ksef_token = $this->ksef_token;
         if (!$ksef_token)
-            throw new Exception("Brak tokenu KSeF");
+                throw new \Exception("Brak tokenu KSeF");
 
         $challenge_response = $this->ksef_api->get_challenge();
 
-        $dt = new DateTime($challenge_response["timestamp"]);
+        $dt = new \DateTime($challenge_response["timestamp"]);
         $milliseconds = ($dt->getTimestamp() * 1000) + (int)$dt->format('v');
 
         $key_manager = new KeyManager($this->mode);
@@ -146,7 +139,7 @@ class Auth {
             $this->auth_status_code = $e->exceptionCode;
             $this->auth_status_desc = $e->exceptionDetails;
             throw $e;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw $e;
         }
 
@@ -154,7 +147,7 @@ class Auth {
             sleep(1);
             $json = $this->ksef_api->get_authentication_status($reference_number, $authentication_token);
             if (!$json || !isset($json["status"]["code"])) {
-                throw new Exception("Błąd podczas pobierania statusu uwierzytelnienia: " . json_encode($json));
+                    throw new \Exception("Błąd podczas pobierania statusu uwierzytelnienia: " . json_encode($json));
             }
 
         } while ($json["status"]["code"] == 100);
@@ -163,7 +156,7 @@ class Auth {
         $this->auth_status_code = $json["status"]["code"] ?? "";
 
         if ($json["status"]["code"] != 200)
-            throw new Exception("Błąd uwierzytelniania: " . $json["status"]["code"] . " " . ($json["status"]["description"] ?? ''));
+                throw new \Exception("Błąd uwierzytelniania: " . $json["status"]["code"] . " " . ($json["status"]["description"] ?? ''));
 
         $json = $this->ksef_api->get_access_tokens($authentication_token);
 
@@ -192,7 +185,7 @@ class Auth {
             } else if($this->ksef_token) {
                 return $this->auth_with_token();
             } else {
-                throw new Exception("Brak danych uwierzytelniających w KSeF");
+                    throw new \Exception("Brak danych uwierzytelniających w KSeF");
             }
         } else {
             $this->auth_status_code = 200;

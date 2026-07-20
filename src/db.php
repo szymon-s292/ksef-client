@@ -1,8 +1,25 @@
 <?php
-require_once 'config.php';
+namespace KSeFClient;
 
-global $db_host, $db_user, $db_pass, $db_name, $conn;
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+class Database {
+    private static ?\mysqli $instance = null;
 
-if ($conn->connect_error)
-    die("DB connection failed");
+    public static function getConnection(): \mysqli {
+        if (self::$instance === null) {
+            $config = require __DIR__ . '/config.php';
+            
+            self::$instance = new \mysqli(
+                $config['db_host'] ?? '127.0.0.1',
+                $config['db_user'] ?? 'root',
+                $config['db_pass'] ?? '',
+                $config['db_name'] ?? 'ksef'
+            );
+
+            if (self::$instance->connect_error) {
+                throw new \Exception("Database connection error: " . self::$instance->connect_error);
+            }
+        }
+
+        return self::$instance;
+    }
+}

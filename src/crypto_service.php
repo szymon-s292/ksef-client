@@ -1,6 +1,8 @@
 <?php
+namespace KSeFClient;
+
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once "key_manager.php";
+require_once __DIR__ . '/key_manager.php';
 
 use phpseclib3\Crypt\RSA;
 use phpseclib3\Crypt\PublicKeyLoader;
@@ -24,8 +26,8 @@ class CryptoService {
             $ciphertext = $rsa->encrypt($symmetric_key);
 
             return base64_encode($ciphertext);
-        } catch(Throwable $e) {
-            throw new Exception('Encryption failed: ' . $e->getMessage(), 0, $e);
+        } catch(\Throwable $e) {
+            throw new \Exception('Encryption failed: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -41,8 +43,8 @@ class CryptoService {
             $ciphertext = $rsa->encrypt($plaintext);
 
             return base64_encode($ciphertext);
-        } catch(Throwable $e) {
-            throw new Exception('Encryption failed: ' . $e->getMessage(), 0, $e);
+        } catch(\Throwable $e) {
+            throw new \Exception('Encryption failed: ' . $e->getMessage(), 0, $e);
         }
     }
 }

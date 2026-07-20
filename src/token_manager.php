@@ -1,6 +1,8 @@
 <?php 
-require_once "db.php";
-require_once "ksef_api.php";
+namespace KSeFClient;
+
+require_once __DIR__ . "/db.php";
+require_once __DIR__ . "/ksef_api.php";
 
 class TokenManager {
     private $conn;
@@ -8,14 +10,12 @@ class TokenManager {
     private $mode;
 
     public function __construct($nip, KsefMode $mode) {
-        global $conn;
-
         $this->mode = $mode;
-        $this->conn = $conn;
+        $this->conn = Database::getConnection();
 
         $this->subject_id = $this->get_subject_id_by_nip($nip);
         if (!$this->subject_id) {
-            throw new Exception("Subject not found for NIP: " . htmlspecialchars($nip));
+            throw new \Exception("Subject not found for NIP: " . htmlspecialchars($nip));
         }
     }
 
@@ -62,13 +62,13 @@ class TokenManager {
         );
 
         if (!$stmt->execute()) {
-            throw new Exception("Error saving tokens: " . $stmt->error);
+            throw new \Exception("Error saving tokens: " . $stmt->error);
         }
 
         return true;
     }
 
-    private function parseExpiry($value): ?DateTimeImmutable {
+    private function parseExpiry($value): ?\DateTimeImmutable {
         if (!$value) return null;
 
         if (is_numeric($value)) {
@@ -77,17 +77,17 @@ class TokenManager {
                 $ts = (int) round($ts / 1000);
             }
             try {
-                return (new DateTimeImmutable('@' . $ts))->setTimezone(new DateTimeZone('UTC'));
-            } catch (Throwable $e) {
+                return (new \DateTimeImmutable('@' . $ts))->setTimezone(new \DateTimeZone('UTC'));
+            } catch (\Throwable $e) {
                 return null;
             }
         }
 
         try {
-            $dt = DateTimeImmutable::createFromFormat(DateTime::ATOM, $value);
-            if ($dt !== false) return $dt->setTimezone(new DateTimeZone('UTC'));
-            return (new DateTimeImmutable($value, new DateTimeZone('UTC')));
-        } catch (Throwable $e) {
+            $dt = \DateTimeImmutable::createFromFormat(\DateTime::ATOM, $value);
+            if ($dt !== false) return $dt->setTimezone(new \DateTimeZone('UTC'));
+            return (new \DateTimeImmutable($value, new \DateTimeZone('UTC')));
+        } catch (\Throwable $e) {
             return null;
         }
     }
@@ -108,7 +108,7 @@ class TokenManager {
         $stmt->bind_param("sss", $access_token, $expiresForDb, $refresh_token);
 
         if (!$stmt->execute()) {
-            throw new Exception("Error updating access token: " . $stmt->error);
+            throw new \Exception("Error updating access token: " . $stmt->error);
         }
 
         return $stmt->affected_rows > 0;
@@ -120,7 +120,7 @@ class TokenManager {
         $stmt->bind_param("i", $this->subject_id);
 
         if (!$stmt->execute()) {
-            throw new Exception("Error deleting expired tokens: " . $stmt->error);
+            throw new \Exception("Error deleting expired tokens: " . $stmt->error);
         }
 
         return true;
@@ -133,7 +133,7 @@ class TokenManager {
         $stmt->bind_param("i", $this->subject_id);
 
         if (!$stmt->execute()) {
-            throw new Exception("Error reading tokens: " . $stmt->error);
+            throw new \Exception("Error reading tokens: " . $stmt->error);
         }
 
         $result = $stmt->get_result();
@@ -142,11 +142,11 @@ class TokenManager {
         if (!$token)
             return null;
         
-        $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $expires = $this->parseExpiry($token['access_token_expires_at']);
 
         if (!$expires) {
-            throw new Exception("Cannot parse access_token_expires_at: " . var_export($token['access_token_expires_at'], true));
+            throw new \Exception("Cannot parse access_token_expires_at: " . var_export($token['access_token_expires_at'], true));
         }
 
         if ($now >= $expires) {
@@ -157,7 +157,7 @@ class TokenManager {
             $access_token_expires_at   = $json['accessToken']['validUntil'] ?? null;
 
             if (!$access_token || !$access_token_expires_at) {
-                throw new Exception("Refresh response missing token or expiry");
+                throw new \Exception("Refresh response missing token or expiry");
             }
 
             if(!$this->save_access($access_token, $access_token_expires_at, $token['refresh_token']))
@@ -181,7 +181,7 @@ class TokenManager {
         $stmt->bind_param("i", $this->subject_id);
 
         if (!$stmt->execute()) {
-            throw new Exception("Error deleting tokens: " . $stmt->error);
+            throw new \Exception("Error deleting tokens: " . $stmt->error);
         }
 
         return true;

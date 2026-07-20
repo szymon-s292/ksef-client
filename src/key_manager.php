@@ -1,6 +1,8 @@
 <?php
-require_once "http.php";
-require_once "ksef_api.php";
+namespace KSeFClient;
+
+require_once __DIR__ . "/http.php";
+require_once __DIR__ . "/ksef_api.php";
 
 class KeyManager {
     private $ksef_api;

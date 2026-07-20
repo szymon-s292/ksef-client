@@ -1,13 +1,14 @@
 <?php
+namespace KSeFClient;
 
 require_once __DIR__ . "/../vendor/autoload.php";
-require_once "auth.php";
-require_once "http.php";
-require_once "crypto_service.php";
+require_once __DIR__ . "/auth.php";
+require_once __DIR__ . "/http.php";
+require_once __DIR__ . "/crypto_service.php";
 
 use phpseclib3\Crypt\AES;
 
-class Invoice {
+class InteractiveSession {
     private $ksef_api;
     private $auth;
     private $crypto;

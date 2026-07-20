@@ -1,11 +1,12 @@
 <?php
+namespace KSeFClient;
 
 class AuthTokenRequestBuilder {
-    private DOMDocument $doc;
-    private DOMElement $root;
+    private \DOMDocument $doc;
+    private \DOMElement $root;
 
     public function __construct() {
-        $this->doc = new DOMDocument('1.0', 'utf-8');
+        $this->doc = new \DOMDocument('1.0', 'utf-8');
         $this->doc->formatOutput = true;
 
         $this->root = $this->doc->createElementNS(

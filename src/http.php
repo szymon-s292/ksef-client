@@ -1,4 +1,5 @@
 <?php
+namespace KSeFClient;
 
 class HttpRequest {
     public $url;

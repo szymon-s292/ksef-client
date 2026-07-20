@@ -1,26 +1,27 @@
 <?php
+namespace KSeFClient;
 
 class XadesSigner
 {
     private string $raw = '';
     private array $info = [];
-    private OpenSSLAsymmetricKey $privateKey;
+    private \OpenSSLAsymmetricKey $privateKey;
 
     const NAMESPACE_DS = 'http://www.w3.org/2000/09/xmldsig#';
     const NAMESPACE_XADES = 'http://uri.etsi.org/01903/v1.3.2#';
 
-    public function sign(string $xml, string $privateKey, string $certificate, string $pkcs12Password): DOMDocument {
+    public function sign(string $xml, string $privateKey, string $certificate, string $pkcs12Password): \DOMDocument {
         if(empty($privateKey)) {
             if(!$this->certFromPkcs12($certificate, $pkcs12Password)) {
-                throw new Exception('No valid pkcs12 file provided.');
+                throw new \Exception('No valid pkcs12 file provided.');
             }
         } else {
             if(!$this->certFromPemPair($privateKey, $certificate, $pkcs12Password)) {
-                throw new Exception('No valid pem files provided.');
+                throw new \Exception('No valid pem files provided.');
             }
         }
 
-        $dom = new DOMDocument('1.0', 'UTF-8');
+        $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->formatOutput = false;
         $dom->preserveWhiteSpace = false;
         $dom->loadXML($xml);
@@ -136,7 +137,7 @@ class XadesSigner
 
         $signedProperties->appendChild($signedSignatureProperties);
 
-        $signatureTime = $dom->createElementNS(self::NAMESPACE_XADES, 'xades:SigningTime', (new DateTimeImmutable())->format('Y-m-d\TH:i:s\Z'));
+        $signatureTime = $dom->createElementNS(self::NAMESPACE_XADES, 'xades:SigningTime', (new \DateTimeImmutable())->format('Y-m-d\TH:i:s\Z'));
 
         $signedSignatureProperties->appendChild($signatureTime);
 
@@ -186,7 +187,7 @@ class XadesSigner
         $signAlgorithm = defined('OPENSSL_ALGO_SHA256') ? OPENSSL_ALGO_SHA256 : 'sha256';
         
         if(openssl_sign($signedInfoC14N, $currentDigest, $this->privateKey, $signAlgorithm) === false) {
-            throw new Exception('Problem with signing an XML document: ' . (openssl_error_string() ?: 'unknown error'));
+            throw new \Exception('Problem with signing an XML document: ' . (openssl_error_string() ?: 'unknown error'));
         }
 
         $keyDetails = openssl_pkey_get_details($this->privateKey);
@@ -218,13 +219,13 @@ class XadesSigner
     {
         $certs = [];
         if((openssl_pkcs12_read($pkcs12, $certs, $password)) === false)
-            throw new Exception(sprintf("Can't read a p12 file. OpenSSL: %s", (openssl_error_string() ?: '')));
+            throw new \Exception(sprintf("Can't read a p12 file. OpenSSL: %s", (openssl_error_string() ?: '')));
 
         if(($this->privateKey = openssl_pkey_get_private($certs['pkey'], $password)) === false)
-            throw new Exception(sprintf("Can't read a private key. OpenSSL: %s", (openssl_error_string() ?: '')));
+            throw new \Exception(sprintf("Can't read a private key. OpenSSL: %s", (openssl_error_string() ?: '')));
 
         if(($this->info = openssl_x509_parse($certs['cert'])) === false)
-            throw new Exception(sprintf('Unable to parse a cert. OpenSSL: %s', (openssl_error_string() ?: '')));
+            throw new \Exception(sprintf('Unable to parse a cert. OpenSSL: %s', (openssl_error_string() ?: '')));
 
         $this->raw = $this->extractCertificateBase64($certs['cert']);
 
@@ -236,12 +237,12 @@ class XadesSigner
         $pkeyPem = $this->ensurePemFormat($pkeyPem, 'PRIVATE KEY');
 
         if(($this->privateKey = openssl_pkey_get_private($pkeyPem, $password ?: null)) === false)
-            throw new Exception(sprintf("Can't read a private key. OpenSSL: %s", (openssl_error_string() ?: '')));
+            throw new \Exception(sprintf("Can't read a private key. OpenSSL: %s", (openssl_error_string() ?: '')));
 
         $this->raw = $this->extractCertificateBase64($certPem);
 
         if(($this->info = openssl_x509_parse($certPem)) === false)
-            throw new Exception(sprintf('Unable to parse a cert. OpenSSL: %s', (openssl_error_string() ?: '')));
+            throw new \Exception(sprintf('Unable to parse a cert. OpenSSL: %s', (openssl_error_string() ?: '')));
 
         return true;
     }
@@ -288,7 +289,7 @@ class XadesSigner
             $offset = 2;
             
             if (ord($signature[$offset]) !== 0x02) {
-                throw new Exception('Invalid DER format: R component marker not found');
+                throw new \Exception('Invalid DER format: R component marker not found');
             }
             $offset++;
             
@@ -296,14 +297,14 @@ class XadesSigner
             $offset++;
             
             if ($offset + $rLength > $len) {
-                throw new Exception('Invalid DER format: R length exceeds signature');
+                throw new \Exception('Invalid DER format: R length exceeds signature');
             }
             
             $r = substr($signature, $offset, $rLength);
             $offset += $rLength;
             
             if (ord($signature[$offset]) !== 0x02) {
-                throw new Exception('Invalid DER format: S component marker not found');
+                throw new \Exception('Invalid DER format: S component marker not found');
             }
             $offset++;
             
@@ -311,7 +312,7 @@ class XadesSigner
             $offset++;
             
             if ($offset + $sLength > $len) {
-                throw new Exception('Invalid DER format: S length exceeds signature');
+                throw new \Exception('Invalid DER format: S length exceeds signature');
             }
             
             $s = substr($signature, $offset, $sLength);
@@ -320,7 +321,7 @@ class XadesSigner
             $s = str_pad(ltrim($s, "\x00"), $componentSize, "\x00", STR_PAD_LEFT);
             
             return $r . $s;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $signature;
         }
     }
@@ -374,7 +375,7 @@ class XadesSigner
         for ($i = 0; $i < $len; $i++) {
             $current = strpos('0123456789abcdef', $hex[$i]);
             if ($current === false) {
-                throw new InvalidArgumentException("Invalid hex string: $hex");
+                throw new \InvalidArgumentException("Invalid hex string: $hex");
             }
             $dec = bcmul($dec, '16');
             $dec = bcadd($dec, (string)$current);
