@@ -3,3 +3,4 @@ src/config.php
 examples/1091041978.crt
 examples/1091041978.key
 .gitignore
+examples

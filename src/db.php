@@ -6,13 +6,15 @@ class Database {
 
     public static function getConnection(): \mysqli {
         if (self::$instance === null) {
-            $config = require __DIR__ . '/config.php';
-            
+            if(!defined('KSEF_DB_HOST') || !defined('KSEF_DB_USER') || !defined('KSEF_DB_PASS') || !defined('KSEF_DB_NAME')) {
+                throw new \Exception("Database configuration constants are not defined.");
+            }
+
             self::$instance = new \mysqli(
-                $config['db_host'] ?? '127.0.0.1',
-                $config['db_user'] ?? 'root',
-                $config['db_pass'] ?? '',
-                $config['db_name'] ?? 'ksef'
+                KSEF_DB_HOST,
+                KSEF_DB_USER,
+                KSEF_DB_PASS,
+                KSEF_DB_NAME
             );
 
             if (self::$instance->connect_error) {
