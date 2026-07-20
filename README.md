@@ -54,6 +54,8 @@ $ksef_api = new KsefApi(
 
 ## Przykłady użycia
 
+## Autoryzacja
+
 #### Pobranie tokenów dostępowych przy użyciu autoryzacji certyfikatem.
 
 ```php
@@ -156,3 +158,70 @@ $tokens = $auth->get_access_token();
 ]
 */
 ```
+
+### Wysyłka faktur i pobieranie ich statusu i UPO
+
+#### Rozpoczęcie sesji interaktywnej do wysyłki faktur.
+
+```php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use KSeFClient\KsefMode;
+use KSeFClient\Auth;
+use KSeFClient\InteractiveSession;
+
+$interactive_session = new InteractiveSession(
+    $auth, // wcześniej utworzona klasa 'Auth' do uwierzytelnienia w KSeF
+    KsefMode::TEST
+);
+
+// zwracany jest numer referencyjny sesji interaktywnej
+$session_reference_number = $interactive_session->start_session("FA (3)", "1-0E", "FA"); 
+```
+
+#### Wysyłka faktury do KSeF w sesji interaktywnej.
+
+```php
+$invoice_reference_number = $interactive_session->send($xml); // wysyłka faktury w formacie XML FA (3) do KSeF w sesji interaktywnej, zwracany jest numer referencyjny faktury w sesji interaktywnej
+```
+
+#### Zamykanie sesji interaktywnej.
+
+```php
+$interactive_session->close_session();
+```
+
+#### Pobieranie statusu faktury z sesji interaktywnej.
+
+```php
+$ksef_api = new KsefApi(KsefMode::TEST);
+$auth = new Auth("1091041978", KsefMode::TEST, null, $ksef_cert, $ksef_pkey, $pkey_pass, false);
+$status = $ksef_api->get_invoice_from_session($auth->get_access_token()['access_token'], $session_reference_number, $invoice_reference_number);
+
+// zwracana wartość taka sama jak w [dokumentacji KSeF](https://api.ksef.mf.gov.pl/docs/v2/index.html#tag/Status-wysylki-i-UPO/paths/~1sessions~1%7BreferenceNumber%7D~1invoices~1%7BinvoiceReferenceNumber%7D/get)
+
+/*
+[
+    "ordinalNumber" => 1,
+    "referenceNumber" => "",
+    "invoicingDate" => "",
+    "upoDownloadUrl" => "",
+    "status" => [
+        "code" => 200,
+        "description" => "",
+        "details" => [],
+        "extensions" => {}
+    ],
+]
+*/ 
+```
+
+#### Pobieranie UPO faktury
+```php
+$upo_xml = $ksef_api->download_upo($auth->get_access_token()['access_token'], $status['upoDownloadUrl']);
+```
+####
+
+### Pobieranie faktur
+
+In progress...
